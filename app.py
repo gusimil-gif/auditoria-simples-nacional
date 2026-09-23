@@ -131,6 +131,20 @@ with st.sidebar:
             st.rerun()
 
     st.markdown("---")
+    st.subheader("📖 Manual de Instruções")
+    pdf_manual_path = "Manual_Operacao_Auditoria_Simples_Nacional.pdf"
+    if os.path.exists(pdf_manual_path):
+        with open(pdf_manual_path, "rb") as f_pdf:
+            st.download_button(
+                label="📥 Baixar Manual em PDF",
+                data=f_pdf.read(),
+                file_name="Manual_Operacao_Auditoria_Simples_Nacional.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+                help="Baixe o manual completo de operação do sistema em PDF (4 páginas)."
+            )
+
+    st.markdown("---")
     st.subheader("📁 Amostras de Teste (Hiléia)")
     st.caption("Carregue dados simulados prontos para testar:")
     col_amostra1, col_amostra2 = st.columns(2)
