@@ -200,8 +200,9 @@ def criar_manual_pdf(caminho_saida: str):
     ))
 
     dados_acesso = [
-        [Paragraph("<b>Endereço Web (URL):</b>", style_body), Paragraph("https://approaches-characters-ftp-promotional.trycloudflare.com", style_body)],
-        [Paragraph("<b>Endereço Local Alternativo:</b>", style_body), Paragraph("http://localhost:8501", style_body)],
+        [Paragraph("<b>Link Online Ativo:</b>", style_body), Paragraph("https://33e3e0a40fb261f3-179-98-75-109.serveousercontent.com", style_body)],
+        [Paragraph("<b>Deploy Permanente 24/7 (Streamlit Cloud):</b>", style_body), Paragraph("https://github.com/gusimil-gif/auditoria-simples-nacional", style_body)],
+        [Paragraph("<b>Endereço na Rede Local (Wi-Fi):</b>", style_body), Paragraph("http://192.168.15.132:8501", style_body)],
         [Paragraph("<b>Usuário Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>admin</b></font>", style_body)],
         [Paragraph("<b>Senha Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>Auditoria@2026</b></font>", style_body)],
         [Paragraph("<b>Usuários Adicionais:</b>", style_body), Paragraph("<b>auditoria</b> (Senha: Hileia@2026) | <b>gustavo</b> (Senha: Auditoria@2026)", style_body)]

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Operação - Auditoria Fiscal Simples Nacional</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  :root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --bg: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --text: #0F172A;
+    --text-muted: #475569;
+    --border: #E2E8F0;
+    --success: #166534;
+    --success-bg: #DCFCE7;
+    --warning: #854D0E;
+    --warning-bg: #FEF9C3;
+    --danger: #991B1B;
+    --danger-bg: #FEE2E2;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 30px 15px;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: 45px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+
+  .header {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+  }
+  .tag {
+    background: #EFF6FF;
+    color: var(--primary-light);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  h1 {
+    color: var(--primary);
+    margin: 12px 0 6px 0;
+    font-size: 1.85rem;
+    line-height: 1.25;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  h2 {
+    color: var(--primary);
+    font-size: 1.25rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    margin-top: 35px;
+    margin-bottom: 15px;
+  }
+
+  h3 {
+    color: var(--primary-light);
+    font-size: 1.05rem;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  p, li {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .box-info {
+    background-color: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .box-warning {
+    background-color: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  th {
+    background-color: var(--primary);
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+
+  .badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .badge-success { background: var(--success-bg); color: var(--success); }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+  .badge-info { background: #E0E7FF; color: #3730A3; }
+
+  code {
+    background: #F1F5F9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.88rem;
+    color: #0F172A;
+  }
+
+  .btn-print {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-print:hover { background: #1E40AF; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
+    .btn-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir ou Salvar em PDF</button>
+
+  <div class="header">
+    <span class="tag">Auditoria Fiscal • Hiléia Alimentos</span>
+    <h1>Manual de Operação do Sistema de Auditoria</h1>
+    <p class="subtitle">Validação em Lote de Optantes pelo Simples Nacional & Emissão de Pareceres Tributários</p>
+  </div>
+
+  <div class="box-info">
+    <h3 style="margin-top:0; color:#1E3A8A;">🌐 Acesso Online do Sistema</h3>
+    <p style="margin: 4px 0;"><b>Link Online Direto (HTTPS):</b> <a href="https://33e3e0a40fb261f3-179-98-75-109.serveousercontent.com" target="_blank">https://33e3e0a40fb261f3-179-98-75-109.serveousercontent.com</a></p>
+    <p style="margin: 4px 0;"><b>Link Rede Local Wi-Fi:</b> <code>http://192.168.15.132:8501</code></p>
+    <p style="margin: 4px 0;"><b>Repositório Oficial no GitHub:</b> <a href="https://github.com/gusimil-gif/auditoria-simples-nacional" target="_blank">https://github.com/gusimil-gif/auditoria-simples-nacional</a></p>
+    <p style="margin: 4px 0;"><b>Usuário Master:</b> <code>admin</code> &nbsp;|&nbsp; <b>Senha Master:</b> <code>Auditoria@2026</code></p>
+    <p style="margin: 4px 0; font-size: 0.85rem; color: #64748B;">Usuários adicionais liberados: <code>auditoria</code> (senha: <code>Hileia@2026</code>) e <code>gustavo</code> (senha: <code>Auditoria@2026</code>).</p>
+  </div>
+
+  <h2>1. Visão Geral do Sistema</h2>
+  <p>O sistema foi desenvolvido para realizar a auditoria contábil, fiscal e financeira em lote de clientes e fornecedores a partir de relatórios de <b>Notas Fiscais de Vendas (Faturamento da Hiléia)</b>, <b>Notas Fiscais de Compra (Fornecedores de insumos e matérias-primas)</b> ou <b>Cadastros Gerais</b>.</p>
+  <p>Ele substitui a consulta manual lenta da Receita Federal por consultas automáticas em lote com validação de dígitos verificadores, desduplicação e parecer técnico imediato.</p>
+
+  <h2>2. Passo a Passo: Auditoria em Lote (Planilhas)</h2>
+  
+  <h3>Passo 1: Fazer o Upload da Planilha</h3>
+  <ul>
+    <li>Acesse a aba <b>"📊 Auditoria em Lote (Planilhas)"</b>.</li>
+    <li>Arraste ou selecione seu arquivo <code>.xlsx</code>, <code>.xls</code> ou <code>.csv</code>.</li>
+    <li>O sistema aceita arquivos com qualquer estrutura de colunas, desde que haja uma coluna com CNPJ.</li>
+  </ul>
+
+  <h3>Passo 2: Mapeamento da Coluna</h3>
+  <p>O algoritmo inteligente detecta automaticamente a coluna que contém o CNPJ (ex: <code>CNPJ_Cliente</code>, <code>CNPJ_Fornecedor</code>, <code>CPF/CNPJ</code>, <code>Documento</code>). Caso deseje alterar, selecione outra coluna na lista suspensa.</p>
+
+  <h3>Passo 3: Iniciar a Auditoria</h3>
+  <ul>
+    <li>Clique em <b>"🚀 Iniciar Auditoria em Lote"</b>.</li>
+    <li>Acompanhe a barra de progresso em tempo real com o percentual e a Razão Social de cada parceiro consultado.</li>
+    <li><b>Desduplicação Inteligente:</b> Se 300 notas fiscais pertencerem ao mesmo fornecedor, o sistema consulta a API apenas 1 vez e replica o parecer para todas as 300 linhas!</li>
+  </ul>
+
+  <h2>3. Entendendo os Pareceres Fiscais & Indicadores</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Enquadramento</th>
+        <th>Badge</th>
+        <th>Parecer de Auditoria & Implicações Legais</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Optante Simples Nacional</b></td>
+        <td><span class="badge badge-success">🟢 Optante</span></td>
+        <td><b>Dispensa de Retenção:</b> Dispensado de retenção na fonte de PIS, COFINS, CSLL e IRRF conforme art. 30 da Lei 10.833/2003 e IN RFB nº 1.234/2012.</td>
+      </tr>
+      <tr>
+        <td><b>SIMEI (MEI)</b></td>
+        <td><span class="badge badge-warning">🟡 MEI</span></td>
+        <td><b>Microempreendedor Individual:</b> Dispensa ampla de retenções na fonte. Recolhimento mensal fixo unificado no DAS-MEI.</td>
+      </tr>
+      <tr>
+        <td><b>Não Optante (Regime Geral)</b></td>
+        <td><span class="badge badge-info">⚪ Regime Geral</span></td>
+        <td><b>Lucro Presumido ou Real:</b> Exige retenção normal na fonte de PIS, COFINS, CSLL e IRRF incidentes sobre a operação.</td>
+      </tr>
+      <tr>
+        <td><b>Excluído do Simples</b></td>
+        <td><span class="badge badge-warning">🟠 Excluído</span></td>
+        <td><b>Ex-Optante:</b> Conferir a data de exclusão em relação à data de emissão da nota fiscal para verificar se houve omissão de tributos.</td>
+      </tr>
+      <tr>
+        <td><b>Risco Cadastral (Baixada/Inapta)</b></td>
+        <td><span class="badge badge-danger">🔴 Crítico</span></td>
+        <td><b>ALERTA GRAVE:</b> Risco iminente de inidoneidade fiscal da nota e glosa de créditos tributários. Exige averiguação contábil urgente.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. Como Exportar os Resultados</h2>
+  <ul>
+    <li><b>📥 Baixar Relatório Completo (.xlsx):</b> Gera arquivo profissional do Excel com 3 abas estilizadas:
+      <ol>
+        <li><i>Base Auditada:</i> Todas as notas com colunas de auditoria e cores condicionais.</li>
+        <li><i>Resumo por CNPJ:</i> Visão consolidada por CNPJ único com contagem de notas associadas.</li>
+        <li><i>Sumário Executivo:</i> Indicadores percentuais e notas de compliance contábil.</li>
+      </ol>
+    </li>
+    <li><b>📥 Baixar Base em CSV (.csv):</b> Formatado em UTF-8 com BOM e ponto-e-vírgula (<code>;</code>) para abertura direta no Microsoft Excel brasileiro.</li>
+  </ul>
+
+  <h2>5. Consulta Individual Avulsa & Histórico</h2>
+  <ul>
+    <li><b>Consulta Individual:</b> Na aba <i>"🔍 Consulta Individual Avulsa"</i>, digite qualquer CNPJ para visualizar o Cartão Completo, Endereço, CNAE e <b>Quadro de Sócios e Administradores (QSA)</b>.</li>
+    <li><b>Histórico de Auditorias:</b> Na aba <i>"📋 Histórico & Pareceres"</i>, você pode consultar todos os CNPJs já auditados no banco local seguro e exportar a relação completa.</li>
+  </ul>
+
+  <div class="box-warning">
+    <b>💡 Boas Práticas de Segurança & LGPD:</b>
+    <br/>
+    Ao concluir seu trabalho, você pode clicar no botão <b>"Zerar Sessão"</b> na barra lateral para limpar as planilhas da memória e clicar em <b>"🚪 Sair"</b> para encerrar o login.
+  </div>
+
+  <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); color: #64748B; font-size: 0.85rem;">
+    Equipe de Auditoria Contábil, Fiscal e Financeira — Hiléia Alimentos • 2026
+  </div>
+</div>
+
+</body>
+</html>
