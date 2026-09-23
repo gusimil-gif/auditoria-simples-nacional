@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoria Fiscal Simples Nacional | Hiléia</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830284.png">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SheetJS para manipulação completa de Excel (.xlsx, .xls, .csv) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .badge-simples { background-color: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+    .badge-mei { background-color: #FEF9C3; color: #854D0E; border: 1px solid #FEF08A; }
+    .badge-normal { background-color: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; }
+    .badge-excluido { background-color: #FFEDD5; color: #9A3412; border: 1px solid #FED7AA; }
+    .badge-critico { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- ========================================== -->
+  <!-- TELA DE LOGIN (ACESSO RESTRITO MASTER) -->
+  <!-- ========================================== -->
+  <div id="loginScreen" class="flex-1 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3 bg-blue-50 rounded-2xl mb-3">
+          <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" width="60" height="60" alt="Logo">
+        </div>
+        <h1 class="text-2xl font-bold text-blue-900">Portal de Auditoria Fiscal</h1>
+        <p class="text-slate-500 text-sm mt-1">Hiléia Alimentos — Verificação do Simples Nacional</p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Usuário Master</label>
+          <div class="relative">
+            <input type="text" id="userInput" value="admin" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800 text-sm font-medium" placeholder="Ex: admin" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Senha Master</label>
+          <div class="relative">
+            <input type="password" id="passInput" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-slate-800 text-sm font-medium" placeholder="Digite sua senha" required autofocus>
+          </div>
+        </div>
+
+        <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 flex-shrink-0"></i>
+          <span>Usuário ou senha incorretos.</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+          <span>Acessar o Sistema</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+        <div class="flex items-center gap-2 font-semibold text-slate-700 mb-1.5">
+          <i data-lucide="key" class="w-4 h-4 text-blue-600"></i>
+          <span>Credenciais Master Pré-configuradas:</span>
+        </div>
+        <div class="flex justify-between py-0.5">
+          <span class="text-slate-600">Usuário:</span>
+          <code class="font-bold text-blue-900 bg-white px-2 py-0.5 rounded border border-slate-200">admin</code>
+        </div>
+        <div class="flex justify-between py-0.5">
+          <span class="text-slate-600">Senha:</span>
+          <code class="font-bold text-blue-900 bg-white px-2 py-0.5 rounded border border-slate-200">Auditoria@2026</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- SISTEMA PRINCIPAL (APÓS LOGIN) -->
+  <!-- ========================================== -->
+  <div id="appScreen" class="hidden flex-1 flex flex-col">
+    <!-- Topbar -->
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" width="36" height="36" alt="Icon">
+          <div>
+            <h1 class="font-bold text-lg leading-tight tracking-tight">Auditoria Simples Nacional</h1>
+            <p class="text-blue-200 text-xs">Hiléia Alimentos • Validação Fiscal & Cadastral RFB</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm">
+          <div class="hidden sm:flex items-center gap-2 bg-blue-950 px-3 py-1.5 rounded-lg border border-blue-800 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Conectado à <b>Receita Federal</b></span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-blue-100 hidden md:inline">Logado como: <b id="userBadge" class="text-white">admin</b></span>
+            <a href="Manual_Operacao_Auditoria_Simples_Nacional.pdf" target="_blank" class="px-2.5 py-1.5 bg-blue-800 hover:bg-blue-700 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Manual PDF</span>
+            </a>
+            <button id="btnLogout" class="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg flex items-center gap-1 transition-all">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              <span>Sair</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navegação de Abas -->
+    <div class="bg-white border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-semibold">
+        <button onclick="switchTab('tabLote')" id="btnTabLote" class="py-3 px-1 border-b-2 border-blue-700 text-blue-700 flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          <span>Auditoria em Lote (Planilhas)</span>
+        </button>
+        <button onclick="switchTab('tabIndividual')" id="btnTabIndividual" class="py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Consulta Individual Avulsa</span>
+        </button>
+        <button onclick="switchTab('tabHistorico')" id="btnTabHistorico" class="py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>Histórico & Banco de Consultas</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+      <!-- ============================================== -->
+      <!-- ABA 1: AUDITORIA EM LOTE (PLANILHAS) -->
+      <!-- ============================================== -->
+      <div id="tabLote" class="space-y-6">
+        
+        <!-- Upload Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-5 h-5 text-blue-600"></i>
+                <span>Importar Planilha de Notas Fiscais ou Cadastros</span>
+              </h2>
+              <p class="text-slate-500 text-xs mt-0.5">Selecione arquivos <b>Excel (.xlsx, .xls)</b> ou <b>CSV (.csv)</b> de notas faturadas (vendas), notas de compra ou cadastros.</p>
+            </div>
+
+            <!-- Botões de Amostra Rápida Hiléia -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-400">Testar com Amostras Hiléia:</span>
+              <button onclick="carregarAmostra('sample_data/notas_faturadas_hileia_exemplo.xlsx', 'NF_Vendas_Hileia.xlsx')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-300 flex items-center gap-1.5 transition-all">
+                <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>NF Vendas</span>
+              </button>
+              <button onclick="carregarAmostra('sample_data/notas_compras_hileia_exemplo.xlsx', 'NF_Compras_Hileia.xlsx')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-300 flex items-center gap-1.5 transition-all">
+                <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>NF Compras</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drop Area -->
+          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-8 text-center cursor-pointer bg-slate-50 hover:bg-blue-50/50 transition-all">
+            <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv">
+            <i data-lucide="file-up" class="w-10 h-10 text-blue-600 mx-auto mb-2"></i>
+            <p class="text-sm font-semibold text-slate-700">Clique para selecionar ou arraste sua planilha aqui</p>
+            <p class="text-xs text-slate-400 mt-1">Formatos suportados: .xlsx, .xls, .csv (sem limite de linhas)</p>
+          </div>
+
+          <!-- Configuração de Coluna (aparece após carregar arquivo) -->
+          <div id="columnSelectorSection" class="hidden mt-5 pt-5 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Coluna de CNPJ Detectada:</label>
+              <div class="flex items-center gap-3">
+                <select id="cnpjColumnSelect" class="w-full md:w-80 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"></select>
+                <span id="fileStatsBadge" class="text-xs px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full font-medium"></span>
+              </div>
+            </div>
+
+            <button id="btnStartBatch" onclick="iniciarAuditoriaLote()" class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl shadow-md text-sm flex items-center gap-2 transition-all">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+              <span>Iniciar Auditoria em Lote</span>
+            </button>
+          </div>
+
+          <!-- Barra de Progresso em Tempo Real -->
+          <div id="progressSection" class="hidden mt-5 pt-5 border-t border-slate-100">
+            <div class="flex justify-between text-xs font-semibold mb-1.5">
+              <span id="progressStatus" class="text-blue-900">Consultando bases oficiais...</span>
+              <span id="progressPct" class="text-blue-700">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+              <div id="progressBar" class="bg-blue-600 h-full rounded-full transition-all duration-150" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção de Resultados (aparece após processamento) -->
+        <div id="resultsSection" class="hidden space-y-6">
+          
+          <!-- KPIs Executivos -->
+          <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-xs text-slate-500 font-medium block">Total de Linhas</span>
+              <span id="kpiTotalLinhas" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-xs text-slate-500 font-medium block">CNPJs Únicos</span>
+              <span id="kpiTotalUnicos" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/30">
+              <span class="text-xs text-emerald-700 font-bold block">Optante Simples</span>
+              <span id="kpiTotalSimples" class="text-2xl font-bold text-emerald-800 mt-1 block">0</span>
+              <span id="kpiPercSimples" class="text-xs text-emerald-600 font-medium">0%</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm bg-amber-50/30">
+              <span class="text-xs text-amber-700 font-bold block">SIMEI (MEI)</span>
+              <span id="kpiTotalMei" class="text-2xl font-bold text-amber-800 mt-1 block">0</span>
+              <span id="kpiPercMei" class="text-xs text-amber-600 font-medium">0%</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-xs text-slate-600 font-bold block">Não Optantes</span>
+              <span id="kpiTotalNaoOptantes" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
+              <span id="kpiPercNaoOptantes" class="text-xs text-slate-500 font-medium">0%</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm bg-red-50/30">
+              <span class="text-xs text-red-700 font-bold block">⚠️ Risco Baixada/Inapta</span>
+              <span id="kpiTotalIrregulares" class="text-2xl font-bold text-red-800 mt-1 block">0</span>
+              <span class="text-xs text-red-600 font-medium">Alerta Crítico</span>
+            </div>
+          </div>
+
+          <!-- Barra de Ações & Download -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <label class="text-xs font-bold text-slate-600">Filtrar por Enquadramento:</label>
+              <select id="filterEnquadramento" onchange="aplicarFiltrosTabela()" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700">
+                <option value="TODOS">Todos os Registros</option>
+                <option value="SIMPLES NACIONAL">Apenas Simples Nacional</option>
+                <option value="SIMEI (MEI)">Apenas SIMEI (MEI)</option>
+                <option value="NÃO OPTANTE (REGIME GERAL)">Não Optantes (Lucro Presumido/Real)</option>
+                <option value="EXCLUÍDO DO SIMPLES">Excluídos do Simples</option>
+                <option value="CRITICO">⚠️ Risco Cadastral (Baixadas/Inaptas)</option>
+              </select>
+            </div>
+
+            <!-- Botões de Download -->
+            <div class="flex items-center gap-2">
+              <button onclick="exportarExcel()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow flex items-center gap-1.5 transition-all">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                <span>Baixar Excel (.xlsx) Multi-Abas</span>
+              </button>
+              <button onclick="exportarCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg shadow flex items-center gap-1.5 transition-all">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Baixar CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabela de Registros Auditados -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto max-h-[500px]">
+              <table id="tabelaAuditoria" class="w-full text-xs text-left">
+                <thead class="bg-blue-900 text-white uppercase text-[11px] sticky top-0">
+                  <tr>
+                    <th class="p-3">CNPJ</th>
+                    <th class="p-3">Razão Social (Receita Federal)</th>
+                    <th class="p-3">Enquadramento</th>
+                    <th class="p-3">Optante Simples?</th>
+                    <th class="p-3">Data Opção</th>
+                    <th class="p-3">MEI?</th>
+                    <th class="p-3">Situação Cadastral</th>
+                    <th class="p-3">Parecer da Auditoria</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaAuditoriaBody" class="divide-y divide-slate-200"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ============================================== -->
+      <!-- ABA 2: CONSULTA INDIVIDUAL AVULSA -->
+      <!-- ============================================== -->
+      <div id="tabIndividual" class="hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
+          <h2 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+            <i data-lucide="search" class="w-5 h-5 text-blue-600"></i>
+            <span>Consulta Cadastral e Tributária Individual</span>
+          </h2>
+          <p class="text-slate-500 text-xs mb-4">Consulte qualquer CNPJ individualmente para emitir parecer técnico e visualizar cartão cadastral completo.</p>
+
+          <form id="individualForm" class="flex gap-3">
+            <input type="text" id="individualCnpjInput" placeholder="Ex: 04.912.871/0001-32" class="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none font-medium" required>
+            <button type="submit" class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg text-sm flex items-center gap-2 shadow transition-all">
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span>Consultar</span>
+            </button>
+          </form>
+
+          <!-- Resultado Individual -->
+          <div id="individualResult" class="hidden mt-6 pt-6 border-t border-slate-200 space-y-4"></div>
+        </div>
+      </div>
+
+
+      <!-- ============================================== -->
+      <!-- ABA 3: HISTÓRICO & BANCO DE PARECERES -->
+      <!-- ============================================== -->
+      <div id="tabHistorico" class="hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Histórico de CNPJs Auditados</h2>
+              <p class="text-slate-500 text-xs">Todos os registros consultados ficam salvos localmente no navegador para evitar retrabalho.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="limparHistorico()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold rounded-lg border border-red-200 transition-all">
+                Limpar Cache
+              </button>
+              <button onclick="exportarHistoricoCSV()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-all">
+                Exportar Histórico CSV
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[450px]">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-100 text-slate-700 uppercase sticky top-0 border-b border-slate-200">
+                <tr>
+                  <th class="p-3">CNPJ</th>
+                  <th class="p-3">Razão Social</th>
+                  <th class="p-3">Enquadramento</th>
+                  <th class="p-3">Optante Simples?</th>
+                  <th class="p-3">MEI?</th>
+                  <th class="p-3">Situação</th>
+                  <th class="p-3">UF</th>
+                  <th class="p-3">Data Consulta</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaHistoricoBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 text-center py-4 text-xs text-slate-400">
+      <span>Hiléia Alimentos — Sistema de Auditoria Contábil, Fiscal e Financeira • 2026</span>
+    </footer>
+  </div>
+
+  <!-- SCRIPT PRINCIPAL DA APLICAÇÃO -->
+  <script>
+    // --- AUTENTICAÇÃO MASTER ---
+    const MASTER_USERS = {
+      'admin': 'Auditoria@2026',
+      'auditoria': 'Hileia@2026',
+      'gustavo': 'Auditoria@2026'
+    };
+
+    function verificarAutenticacao() {
+      const authUser = localStorage.getItem('audit_auth_user');
+      if (authUser && MASTER_USERS[authUser]) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('userBadge').innerText = authUser;
+        lucide.createIcons();
+        carregarTabelaHistorico();
+      } else {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.getElementById('userInput').value.trim().toLowerCase();
+      const pass = document.getElementById('passInput').value.trim();
+
+      if (MASTER_USERS[user] && MASTER_USERS[user] === pass) {
+        localStorage.setItem('audit_auth_user', user);
+        document.getElementById('loginError').classList.add('hidden');
+        verificarAutenticacao();
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.removeItem('audit_auth_user');
+      verificarAutenticacao();
+    });
+
+    // --- NAVEGAÇÃO DE ABAS ---
+    function switchTab(tabId) {
+      ['tabLote', 'tabIndividual', 'tabHistorico'].forEach(t => {
+        document.getElementById(t).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = {
+        'tabLote': 'btnTabLote',
+        'tabIndividual': 'btnTabIndividual',
+        'tabHistorico': 'btnTabHistorico'
+      };
+
+      Object.keys(tabs).forEach(k => {
+        const btn = document.getElementById(tabs[k]);
+        if (k === tabId) {
+          btn.className = "py-3 px-1 border-b-2 border-blue-700 text-blue-700 flex items-center gap-2 font-semibold";
+        } else {
+          btn.className = "py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 font-medium";
+        }
+      });
+
+      if (tabId === 'tabHistorico') carregarTabelaHistorico();
+      lucide.createIcons();
+    }
+
+    // --- VALIDAÇÃO DE CNPJ (MÓDULO 11) ---
+    function limparCNPJ(v) {
+      if (!v) return "";
+      let s = String(v).replace(/\D/g, "");
+      if (s.length > 0 && s.length < 14) s = s.padStart(14, "0");
+      return s;
+    }
+
+    function formatarCNPJ(v) {
+      const c = limparCNPJ(v);
+      if (c.length === 14) {
+        return `${c.slice(0,2)}.${c.slice(2,5)}.${c.slice(5,8)}/${c.slice(8,12)}-${c.slice(12,14)}`;
+      }
+      return v;
+    }
+
+    function validarCNPJ(cnpjRaw) {
+      const c = limparCNPJ(cnpjRaw);
+      if (!c || c.length !== 14 || /^(\d)\1+$/.test(c)) return false;
+
+      const m1 = [5,4,3,2,9,8,7,6,5,4,3,2];
+      let s1 = 0;
+      for (let i = 0; i < 12; i++) s1 += parseInt(c[i]) * m1[i];
+      let r1 = s1 % 11;
+      let d1 = r1 < 2 ? 0 : 11 - r1;
+      if (parseInt(c[12]) !== d1) return false;
+
+      const m2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
+      let s2 = 0;
+      for (let i = 0; i < 13; i++) s2 += parseInt(c[i]) * m2[i];
+      let r2 = s2 % 11;
+      let d2 = r2 < 2 ? 0 : 11 - r2;
+      return parseInt(c[13]) === d2;
+    }
+
+    function formatarDataBR(isoStr) {
+      if (!isoStr) return "-";
+      try {
+        const parts = String(isoStr).slice(0, 10).split("-");
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } catch (e) {}
+      return isoStr;
+    }
+
+    // --- REGRAS FISCAIS & PARECER DE AUDITORIA ---
+    function gerarParecerFiscal(dados) {
+      if (!dados || dados.sucesso === false) {
+        return {
+          enquadramento: "INVÁLIDO / NÃO ENCONTRADO",
+          isOptante: false,
+          isMei: false,
+          risco: "CRÍTICO",
+          badgeClass: "badge-critico",
+          parecer: dados ? dados.erro : "CNPJ matematicamente inválido ou não localizado."
+        };
+      }
+
+      const sit = (dados.descricao_situacao_cadastral || dados.situacao_cadastral || "ATIVA").toUpperCase();
+      const isIrregular = ["BAIXADA", "INAPTA", "SUSPENSA", "NULA"].includes(sit);
+
+      if (dados.opcao_pelo_mei === true) {
+        return {
+          enquadramento: "SIMEI (MEI)",
+          isOptante: true,
+          isMei: true,
+          risco: isIrregular ? "CRÍTICO" : "BAIXO",
+          badgeClass: "badge-mei",
+          parecer: `MICROEMPREENDEDOR INDIVIDUAL (SIMEI) desde ${formatarDataBR(dados.data_opcao_pelo_mei)}. Dispensa retenções na fonte de IRRF, CSLL, PIS e COFINS.` + (isIrregular ? ` ATENÇÃO: Situação cadastral ${sit}!` : "")
+        };
+      }
+
+      if (dados.opcao_pelo_simples === true) {
+        return {
+          enquadramento: "SIMPLES NACIONAL",
+          isOptante: true,
+          isMei: false,
+          risco: isIrregular ? "CRÍTICO" : "BAIXO",
+          badgeClass: "badge-simples",
+          parecer: `OPTANTE PELO SIMPLES NACIONAL desde ${formatarDataBR(dados.data_opcao_pelo_simples)}. Dispensa de retenção na fonte conforme art. 30 da Lei 10.833/2003 e IN RFB nº 1.234/2012.` + (isIrregular ? ` ALERTA: Situação cadastral ${sit}!` : "")
+        };
+      }
+
+      if (dados.data_exclusao_do_simples) {
+        return {
+          enquadramento: "EXCLUÍDO DO SIMPLES",
+          isOptante: false,
+          isMei: false,
+          risco: isIrregular ? "CRÍTICO" : "MÉDIO",
+          badgeClass: "badge-excluido",
+          parecer: `EXCLUÍDO DO SIMPLES em ${formatarDataBR(dados.data_exclusao_do_simples)}. Regime Normal (Lucro Presumido/Real). Retenções obrigatórias para notas posteriores à exclusão.`
+        };
+      }
+
+      return {
+        enquadramento: "NÃO OPTANTE (REGIME GERAL)",
+        isOptante: false,
+        isMei: false,
+        risco: isIrregular ? "CRÍTICO" : "BAIXO",
+        badgeClass: "badge-normal",
+        parecer: `NÃO OPTANTE (Lucro Presumido ou Real). Sujeito à retenção regular na fonte de tributos federais.` + (isIrregular ? ` ALERTA GRAVE: Empresa com situação ${sit}!` : "")
+      };
+    }
+
+    // --- API CLIENT COM FALLBACK (BRASILAPI -> MINHA RECEITA) ---
+    async function consultarCNPJ(cnpjRaw) {
+      const cnpj = limparCNPJ(cnpjRaw);
+      if (!validarCNPJ(cnpj)) {
+        return { sucesso: false, erro: "CNPJ matematicamente inválido (Módulo 11)" };
+      }
+
+      // 1. Checa cache local do navegador
+      const cacheKey = `cnpj_${cnpj}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try { return JSON.parse(cached); } catch (e) {}
+      }
+
+      let data = null;
+
+      // 2. Provedor Primário: BrasilAPI
+      try {
+        const resp1 = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+        if (resp1.ok) {
+          data = await resp1.json();
+          data.fonte = "BrasilAPI";
+        }
+      } catch (err) {}
+
+      // 3. Provedor Secundário: Minha Receita
+      if (!data) {
+        try {
+          const resp2 = await fetch(`https://minhareceita.org/${cnpj}`);
+          if (resp2.ok) {
+            data = await resp2.json();
+            data.fonte = "Minha Receita";
+          }
+        } catch (err) {}
+      }
+
+      if (!data) {
+        return { sucesso: false, erro: "Instabilidade nas APIs da Receita Federal. Tente novamente." };
+      }
+
+      data.sucesso = true;
+      // Salva no cache do navegador
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        salvarNoHistoricoGlobal(cnpj, data);
+      } catch (e) {}
+
+      return data;
+    }
+
+    function salvarNoHistoricoGlobal(cnpj, data) {
+      let historico = JSON.parse(localStorage.getItem('audit_historico_cnpjs') || '{}');
+      historico[cnpj] = {
+        razao_social: data.razao_social || "",
+        situacao: data.descricao_situacao_cadastral || data.situacao_cadastral || "",
+        opcao_simples: data.opcao_pelo_simples,
+        opcao_mei: data.opcao_pelo_mei,
+        data_opcao: data.data_opcao_pelo_simples,
+        uf: data.uf || "",
+        consultado_em: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR')
+      };
+      localStorage.setItem('audit_historico_cnpjs', JSON.stringify(historico));
+    }
+
+    // --- UPLOAD E DETECÇÃO INTELIGENTE DE PLANILHAS ---
+    let planilhaBruta = [];
+    let nomeArquivoCarregado = "";
+    let resultadosAuditados = [];
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-600', 'bg-blue-50'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-blue-600', 'bg-blue-50'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-blue-600', 'bg-blue-50');
+      if (e.dataTransfer.files.length) processarArquivo(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) processarArquivo(e.target.files[0]);
+    });
+
+    async function carregarAmostra(url, nome) {
+      try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const file = new File([blob], nome);
+        processarArquivo(file);
+      } catch (e) {
+        alert("Erro ao carregar arquivo de teste.");
+      }
+    }
+
+    function processarArquivo(file) {
+      nomeArquivoCarregado = file.name;
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        planilhaBruta = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+        if (!planilhaBruta.length) {
+          alert("A planilha selecionada está vazia!");
+          return;
+        }
+
+        const colunas = Object.keys(planilhaBruta[0]);
+        detectarColunaCNPJ(colunas);
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function detectarColunaCNPJ(colunas) {
+      const select = document.getElementById('cnpjColumnSelect');
+      select.innerHTML = "";
+
+      let colunaProvavel = colunas[0];
+      const padroes = [/cnpj/i, /cpf.?cnpj/i, /documento/i, /destinatario/i, /fornecedor/i, /cliente/i];
+
+      for (let p of padroes) {
+        const achou = colunas.find(c => p.test(c));
+        if (achou) { colunaProvavel = achou; break; }
+      }
+
+      colunas.forEach(col => {
+        const opt = document.createElement('option');
+        opt.value = col;
+        opt.innerText = col;
+        if (col === colunaProvavel) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      document.getElementById('fileStatsBadge').innerText = `${planilhaBruta.length.toLocaleString('pt-BR')} linhas carregadas (${nomeArquivoCarregado})`;
+      document.getElementById('columnSelectorSection').classList.remove('hidden');
+      document.getElementById('resultsSection').classList.add('hidden');
+    }
+
+    // --- EXECUÇÃO EM LOTE ---
+    async function iniciarAuditoriaLote() {
+      const colCnpj = document.getElementById('cnpjColumnSelect').value;
+      const progressSection = document.getElementById('progressSection');
+      const progressBar = document.getElementById('progressBar');
+      const progressStatus = document.getElementById('progressStatus');
+      const progressPct = document.getElementById('progressPct');
+
+      progressSection.classList.remove('hidden');
+      document.getElementById('resultsSection').classList.add('hidden');
+
+      // Desduplica CNPJs únicos para poupar rede
+      const mapaCNPJs = {};
+      const cnpjsUnicos = Array.from(new Set(planilhaBruta.map(r => limparCNPJ(r[colCnpj])).filter(Boolean)));
+      const totalUnicos = cnpjsUnicos.length;
+
+      for (let i = 0; i < totalUnicos; i++) {
+        const cnpj = cnpjsUnicos[i];
+        progressStatus.innerText = `Consultando CNPJ (${i+1}/${totalUnicos}): ${formatarCNPJ(cnpj)}...`;
+        const pct = Math.round(((i + 1) / totalUnicos) * 100);
+        progressBar.style.width = `${pct}%`;
+        progressPct.innerText = `${pct}%`;
+
+        const dados = await consultarCNPJ(cnpj);
+        const parecer = gerarParecerFiscal(dados);
+        mapaCNPJs[cnpj] = { dados, parecer };
+
+        // Pequena pausa para requisições externas não cacheadas
+        if (!dados.fonte || dados.fonte !== "Cache Local") {
+          await new Promise(r => setTimeout(r, 60));
+        }
+      }
+
+      // Mapeia de volta para todas as linhas originais
+      resultadosAuditados = planilhaBruta.map(row => {
+        const c = limparCNPJ(row[colCnpj]);
+        const res = mapaCNPJs[c] || { dados: { sucesso: false, erro: "CNPJ Ausente" }, parecer: gerarParecerFiscal(null) };
+        return {
+          ...row,
+          _cnpj: c,
+          _cnpjFormatado: formatarCNPJ(c),
+          _razaoSocial: res.dados.razao_social || "",
+          _enquadramento: res.parecer.enquadramento,
+          _isOptante: res.parecer.isOptante,
+          _isMei: res.parecer.isMei,
+          _dataOpcao: formatarDataBR(res.dados.data_opcao_pelo_simples),
+          _situacao: res.dados.descricao_situacao_cadastral || res.dados.situacao_cadastral || "INVÁLIDO",
+          _risco: res.parecer.risco,
+          _badgeClass: res.parecer.badgeClass,
+          _parecer: res.parecer.parecer
+        };
+      });
+
+      progressSection.classList.add('hidden');
+      exibirResultados(resultadosAuditados, cnpjsUnicos.length);
+    }
+
+    function exibirResultados(dados, totalUnicos) {
+      document.getElementById('resultsSection').classList.remove('hidden');
+
+      // KPIs
+      const totalLinhas = dados.length;
+      const totalSimples = dados.filter(d => d._isOptante && !d._isMei).length;
+      const totalMei = dados.filter(d => d._isMei).length;
+      const totalNaoOpt = dados.filter(d => !d._isOptante).length;
+      const totalIrreg = dados.filter(d => ["BAIXADA", "INAPTA", "SUSPENSA", "NULA"].includes(d._situacao)).length;
+
+      document.getElementById('kpiTotalLinhas').innerText = totalLinhas.toLocaleString('pt-BR');
+      document.getElementById('kpiTotalUnicos').innerText = totalUnicos.toLocaleString('pt-BR');
+      document.getElementById('kpiTotalSimples').innerText = totalSimples.toLocaleString('pt-BR');
+      document.getElementById('kpiPercSimples').innerText = `${((totalSimples/totalLinhas)*100).toFixed(1)}% do total`;
+      document.getElementById('kpiTotalMei').innerText = totalMei.toLocaleString('pt-BR');
+      document.getElementById('kpiPercMei').innerText = `${((totalMei/totalLinhas)*100).toFixed(1)}% do total`;
+      document.getElementById('kpiTotalNaoOptantes').innerText = totalNaoOpt.toLocaleString('pt-BR');
+      document.getElementById('kpiPercNaoOptantes').innerText = `${((totalNaoOpt/totalLinhas)*100).toFixed(1)}% do total`;
+      document.getElementById('kpiTotalIrregulares').innerText = totalIrreg.toLocaleString('pt-BR');
+
+      aplicarFiltrosTabela();
+    }
+
+    function aplicarFiltrosTabela() {
+      const filtro = document.getElementById('filterEnquadramento').value;
+      const tbody = document.getElementById('tabelaAuditoriaBody');
+      tbody.innerHTML = "";
+
+      let filtrados = resultadosAuditados;
+      if (filtro === "CRITICO") {
+        filtrados = filtrados.filter(d => d._risco === "CRÍTICO" || ["BAIXADA", "INAPTA"].includes(d._situacao));
+      } else if (filtro !== "TODOS") {
+        filtrados = filtrados.filter(d => d._enquadramento === filtro);
+      }
+
+      filtrados.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-medium text-slate-900">${row._cnpjFormatado}</td>
+          <td class="p-3 font-semibold text-slate-800">${row._razaoSocial || "-"}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${row._badgeClass}">${row._enquadramento}</span></td>
+          <td class="p-3 font-bold ${row._isOptante ? 'text-emerald-700' : 'text-slate-500'}">${row._isOptante ? 'SIM' : 'NÃO'}</td>
+          <td class="p-3 text-slate-600">${row._dataOpcao}</td>
+          <td class="p-3 font-medium">${row._isMei ? 'SIM' : 'NÃO'}</td>
+          <td class="p-3"><span class="font-bold ${row._situacao === 'ATIVA' ? 'text-emerald-700' : 'text-red-700'}">${row._situacao}</span></td>
+          <td class="p-3 text-[11px] text-slate-600 max-w-xs truncate" title="${row._parecer}">${row._parecer}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- EXPORTAÇÃO EXCEL (.XLSX MULTI-ABAS) E CSV ---
+    function exportarExcel() {
+      if (!resultadosAuditados.length) return;
+
+      const wb = XLSX.utils.book_new();
+
+      // 1. Aba Base Auditada
+      const wsCompleto = XLSX.utils.json_to_sheet(resultadosAuditados.map(r => ({
+        ...r,
+        "CNPJ Formatado": r._cnpjFormatado,
+        "Razão Social RFB": r._razaoSocial,
+        "Enquadramento": r._enquadramento,
+        "Optante Simples?": r._isOptante ? "SIM" : "NÃO",
+        "Data Opção Simples": r._dataOpcao,
+        "Optante MEI?": r._isMei ? "SIM" : "NÃO",
+        "Situação Cadastral": r._situacao,
+        "Risco Fiscal": r._risco,
+        "Parecer da Auditoria": r._parecer
+      })));
+      XLSX.utils.book_append_sheet(wb, wsCompleto, "Base Auditada");
+
+      // 2. Aba Resumo por CNPJ
+      const mapaResumo = {};
+      resultadosAuditados.forEach(r => {
+        if (!mapaResumo[r._cnpj]) {
+          mapaResumo[r._cnpj] = {
+            "CNPJ": r._cnpjFormatado,
+            "Razão Social": r._razaoSocial,
+            "Qtd Notas": 0,
+            "Enquadramento": r._enquadramento,
+            "Optante Simples?": r._isOptante ? "SIM" : "NÃO",
+            "Data Opção": r._dataOpcao,
+            "MEI?": r._isMei ? "SIM" : "NÃO",
+            "Situação": r._situacao,
+            "Risco": r._risco
+          };
+        }
+        mapaResumo[r._cnpj]["Qtd Notas"]++;
+      });
+      const wsResumo = XLSX.utils.json_to_sheet(Object.values(mapaResumo));
+      XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo CNPJs");
+
+      // 3. Aba Sumário Executivo
+      const wsSumario = XLSX.utils.aoa_to_sheet([
+        ["PARECER EXECUTIVO DE AUDITORIA FISCAL - HILÉIA ALIMENTOS"],
+        ["Gerado em:", new Date().toLocaleString('pt-BR')],
+        [],
+        ["Métrica de Auditoria", "Valor"],
+        ["Total de Linhas / Notas", resultadosAuditados.length],
+        ["Total de CNPJs Únicos", Object.keys(mapaResumo).length],
+        ["Optantes pelo Simples Nacional", resultadosAuditados.filter(d => d._isOptante && !d._isMei).length],
+        ["SIMEI (Microempreendedores)", resultadosAuditados.filter(d => d._isMei).length],
+        ["Não Optantes (Regime Normal)", resultadosAuditados.filter(d => !d._isOptante).length],
+        ["Empresas Baixadas / Inaptas", resultadosAuditados.filter(d => ["BAIXADA", "INAPTA"].includes(d._situacao)).length]
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsSumario, "Sumário Executivo");
+
+      XLSX.writeFile(wb, `Auditoria_Simples_${nomeArquivoCarregado.replace(/\.[^/.]+$/, "")}.xlsx`);
+    }
+
+    function exportarCSV() {
+      if (!resultadosAuditados.length) return;
+      const ws = XLSX.utils.json_to_sheet(resultadosAuditados);
+      const csv = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Auditoria_Simples_${nomeArquivoCarregado.replace(/\.[^/.]+$/, "")}.csv`;
+      link.click();
+    }
+
+    // --- CONSULTA INDIVIDUAL ---
+    document.getElementById('individualForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cnpj = document.getElementById('individualCnpjInput').value;
+      const resContainer = document.getElementById('individualResult');
+      resContainer.classList.remove('hidden');
+      resContainer.innerHTML = `<div class="p-6 text-center text-sm font-semibold text-blue-700 animate-pulse">Consultando dados na Receita Federal...</div>`;
+
+      const dados = await consultarCNPJ(cnpj);
+      const parecer = gerarParecerFiscal(dados);
+
+      if (!dados.sucesso) {
+        resContainer.innerHTML = `
+          <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium flex items-center gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+            <span>${parecer.parecer}</span>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      resContainer.innerHTML = `
+        <div class="p-5 bg-slate-50 border-l-4 ${parecer.isOptante ? 'border-emerald-600' : 'border-slate-500'} rounded-xl shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-xs font-mono text-slate-500 font-bold">${formatarCNPJ(dados.cnpj || cnpj)}</span>
+              <h3 class="text-lg font-bold text-blue-900 mt-0.5">${dados.razao_social || "Nome não informado"}</h3>
+              <p class="text-xs text-slate-500">${dados.nome_fantasia ? 'Fantasia: ' + dados.nome_fantasia : ''}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold ${parecer.badgeClass}">${parecer.enquadramento}</span>
+          </div>
+
+          <div class="mt-4 p-3 bg-white border border-slate-200 rounded-lg text-xs leading-relaxed text-slate-700">
+            <b>Parecer Técnico:</b> ${parecer.parecer}
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4 text-xs">
+            <div><b>Situação Cadastral:</b> <span class="${dados.descricao_situacao_cadastral === 'ATIVA' ? 'text-emerald-700' : 'text-red-700'} font-bold">${dados.descricao_situacao_cadastral || dados.situacao_cadastral}</span></div>
+            <div><b>Porte:</b> ${dados.porte || "-"}</div>
+            <div><b>Optante Simples:</b> ${dados.opcao_pelo_simples ? 'SIM' : 'NÃO'} (${formatarDataBR(dados.data_opcao_pelo_simples)})</div>
+            <div><b>Optante MEI:</b> ${dados.opcao_pelo_mei ? 'SIM' : 'NÃO'}</div>
+            <div class="col-span-2"><b>CNAE Principal:</b> ${dados.cnae_fiscal_descricao || "-"}</div>
+            <div class="col-span-2"><b>Endereço:</b> ${dados.logradouro || ''}, ${dados.numero || ''} - ${dados.municipio || ''}/${dados.uf || ''}</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    });
+
+    // --- HISTÓRICO ---
+    function carregarTabelaHistorico() {
+      const historico = JSON.parse(localStorage.getItem('audit_historico_cnpjs') || '{}');
+      const tbody = document.getElementById('tabelaHistoricoBody');
+      tbody.innerHTML = "";
+
+      const keys = Object.keys(historico);
+      if (!keys.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400 text-xs">Nenhuma consulta registrada no histórico ainda.</td></tr>`;
+        return;
+      }
+
+      keys.forEach(cnpj => {
+        const item = historico[cnpj];
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-medium">${formatarCNPJ(cnpj)}</td>
+          <td class="p-3 font-semibold text-slate-800">${item.razao_social || "-"}</td>
+          <td class="p-3">${item.opcao_simples ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold badge-simples">SIMPLES</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold badge-normal">NÃO OPTANTE</span>'}</td>
+          <td class="p-3 font-bold">${item.opcao_simples ? 'SIM' : 'NÃO'}</td>
+          <td class="p-3">${item.opcao_mei ? 'SIM' : 'NÃO'}</td>
+          <td class="p-3 font-medium">${item.situacao}</td>
+          <td class="p-3">${item.uf}</td>
+          <td class="p-3 text-slate-500">${item.consultado_em}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function limparHistorico() {
+      if (confirm("Deseja realmente limpar todo o histórico e cache local de CNPJs?")) {
+        localStorage.removeItem('audit_historico_cnpjs');
+        carregarTabelaHistorico();
+      }
+    }
+
+    function exportarHistoricoCSV() {
+      const historico = JSON.parse(localStorage.getItem('audit_historico_cnpjs') || '{}');
+      const linhas = Object.keys(historico).map(cnpj => ({
+        "CNPJ": formatarCNPJ(cnpj),
+        "Razão Social": historico[cnpj].razao_social,
+        "Situação": historico[cnpj].situacao,
+        "Optante Simples": historico[cnpj].opcao_simples ? "SIM" : "NÃO",
+        "Optante MEI": historico[cnpj].opcao_mei ? "SIM" : "NÃO",
+        "UF": historico[cnpj].uf,
+        "Data Consulta": historico[cnpj].consultado_em
+      }));
+      if (!linhas.length) return alert("Histórico vazio!");
+      const ws = XLSX.utils.json_to_sheet(linhas);
+      const csv = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Historico_CNPJs_Auditados.csv";
+      link.click();
+    }
+
+    // Inicialização ao carregar página
+    verificarAutenticacao();
+  </script>
+</body>
+</html>
