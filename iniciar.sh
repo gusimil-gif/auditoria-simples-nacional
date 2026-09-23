@@ -17,9 +17,24 @@ source .venv/bin/activate
 echo "Verificando dependências..."
 pip install -r requirements.txt -q
 
-echo "Iniciando servidor Streamlit..."
-echo "Acesse no navegador: http://localhost:8501"
-echo "Pressione Ctrl+C para encerrar."
+echo "Iniciando servidor e túnel público online..."
+echo "=========================================================="
+echo "  🔑 CREDENCIAIS MASTER DE ACESSO:"
+echo "  Usuário: admin"
+echo "  Senha:   Auditoria@2026"
 echo "=========================================================="
 
-streamlit run app.py
+# Inicia o Streamlit em segundo plano
+streamlit run app.py --server.port 8501 --server.headless true &
+STREAMLIT_PID=$!
+
+sleep 2
+
+# Inicia o túnel Cloudflare público se o binário existir
+if [ -f "./cloudflared" ]; then
+    echo "Iniciando túnel online público (HTTPS seguro)..."
+    ./cloudflared tunnel --url http://localhost:8501
+else
+    echo "Acesse localmente em: http://localhost:8501"
+    wait $STREAMLIT_PID
+fi

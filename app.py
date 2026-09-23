@@ -16,6 +16,7 @@ from core.api_client import CNPJClient
 from core.auditor import emitir_parecer_fiscal, formatar_data_br
 from core.processor import carregar_planilha, detectar_coluna_cnpj, processar_lote_cnpjs
 from core.exporter import exportar_para_excel, exportar_para_csv
+from core.auth import autenticar_usuario, obter_credenciais_master
 
 # Configuração da página Streamlit
 st.set_page_config(
@@ -26,6 +27,10 @@ st.set_page_config(
 )
 
 # Inicialização de estado de sessão
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "usuario_logado" not in st.session_state:
+    st.session_state.usuario_logado = None
 if "cache" not in st.session_state:
     st.session_state.cache = CNPJCache()
 if "client" not in st.session_state:
@@ -35,6 +40,44 @@ if "audit_data" not in st.session_state:
 if "cancel_requested" not in st.session_state:
     st.session_state.cancel_requested = False
 
+# --- TELA DE LOGIN (ACESSO RESTRITO) ---
+if not st.session_state.authenticated:
+    col_l1, col_l2, col_l3 = st.columns([1, 1.8, 1])
+    with col_l2:
+        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 25px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" width="85" style="margin-bottom: 10px;" />
+            <h1 style="color: #1E3A8A; font-size: 2rem; margin-bottom: 0;">Portal de Auditoria Fiscal</h1>
+            <p style="color: #4B5563; font-size: 1.05rem;">Hiléia Alimentos — Verificação do Simples Nacional</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.form("form_login"):
+            st.subheader("🔐 Acesso Restrito")
+            st.caption("Insira suas credenciais master para acessar o sistema de auditoria.")
+            user_input = st.text_input("Usuário Master", placeholder="Ex: admin", value="admin")
+            pass_input = st.text_input("Senha Master", type="password", placeholder="Digite sua senha")
+            btn_entrar = st.form_submit_button("🚀 Entrar no Sistema", type="primary", use_container_width=True)
+
+            if btn_entrar:
+                if autenticar_usuario(user_input, pass_input):
+                    st.session_state.authenticated = True
+                    st.session_state.usuario_logado = user_input.strip()
+                    st.success("Autenticação realizada com sucesso!")
+                    st.rerun()
+                else:
+                    st.error("Credenciais inválidas. Verifique o usuário e a senha informados.")
+
+        creds = obter_credenciais_master()
+        st.info(
+            f"🔑 **Credenciais Master Configuradas:**\n\n"
+            f"- **Usuário:** `{creds['usuario']}`\n"
+            f"- **Senha:** `{creds['senha']}`",
+            icon="ℹ️"
+        )
+    st.stop()
+
 # --- BARRA LATERAL (SIDEBAR) ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=65)
@@ -42,6 +85,17 @@ with st.sidebar:
     st.caption("Verificação de Optantes pelo Simples Nacional")
     st.markdown("---")
 
+    col_u1, col_u2 = st.columns([2, 1])
+    with col_u1:
+        st.markdown(f"👤 **{st.session_state.usuario_logado or 'Master'}** *(Master)*")
+    with col_u2:
+        if st.button("🚪 Sair", help="Encerrar sessão atual"):
+            st.session_state.authenticated = False
+            st.session_state.usuario_logado = None
+            st.session_state.audit_data = None
+            st.rerun()
+
+    st.markdown("---")
     st.subheader("⚙️ Configuração das APIs")
     provider_option = st.selectbox(
         "Provedor Primário",
