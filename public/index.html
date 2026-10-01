@@ -20,6 +20,7 @@
     .badge-normal { background-color: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; }
     .badge-excluido { background-color: #FFEDD5; color: #9A3412; border: 1px solid #FED7AA; }
     .badge-critico { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-erro { background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
@@ -99,7 +100,7 @@
         <div class="flex items-center gap-4 text-sm">
           <div class="hidden sm:flex items-center gap-2 bg-blue-950 px-3 py-1.5 rounded-lg border border-blue-800 text-xs">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Conectado à <b>Receita Federal</b></span>
+            <span>Cascata Multi-APIs <b>(Minha Receita + BrasilAPI + CNPJ.ws)</b></span>
           </div>
 
           <div class="flex items-center gap-3">
@@ -176,27 +177,58 @@
             <p class="text-xs text-slate-400 mt-1">Formatos suportados: .xlsx, .xls, .csv (sem limite de linhas)</p>
           </div>
 
-          <!-- Configuração de Coluna (aparece após carregar arquivo) -->
-          <div id="columnSelectorSection" class="hidden mt-5 pt-5 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex-1">
-              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Coluna de CNPJ Detectada:</label>
-              <div class="flex items-center gap-3">
-                <select id="cnpjColumnSelect" class="w-full md:w-80 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"></select>
-                <span id="fileStatsBadge" class="text-xs px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full font-medium"></span>
+          <!-- Painel de Configurações Avançadas e Seleção de Coluna -->
+          <div id="columnSelectorSection" class="hidden mt-5 pt-5 border-t border-slate-100 space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <!-- Coluna CNPJ -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Coluna de CNPJ Detectada:</label>
+                <select id="cnpjColumnSelect" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"></select>
+                <span id="fileStatsBadge" class="text-[11px] text-blue-700 font-medium block mt-1"></span>
+              </div>
+
+              <!-- Modo de Velocidade / Lote Grande -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Modo de Auditoria & Velocidade:</label>
+                <select id="modoVelocidadeSelect" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                  <option value="SEGURO" selected>🛡️ Lote Grande (>1.000 CNPJs) - Seguro contra Bloqueio</option>
+                  <option value="RAPIDO">⚡ Modo Rápido (Lotes pequenos &lt; 500 CNPJs)</option>
+                  <option value="TURBO">🚀 Modo Turbo (Multi-Requisição Concorrente)</option>
+                </select>
+                <span class="text-[11px] text-slate-500 block mt-1">Evita erro 429 de excesso de requisições.</span>
+              </div>
+
+              <!-- Token Opcional para API Paga -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Chave / Token de API (Opcional):</label>
+                <input type="password" id="tokenApiKey" placeholder="Token CNPJ.ws ou ReceitaWS" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                <span class="text-[11px] text-slate-500 block mt-1">Opcional. Se tiver token comercial, cole aqui.</span>
               </div>
             </div>
 
-            <button id="btnStartBatch" onclick="iniciarAuditoriaLote()" class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl shadow-md text-sm flex items-center gap-2 transition-all">
-              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-              <span>Iniciar Auditoria em Lote</span>
-            </button>
+            <!-- Botões de Ação -->
+            <div class="flex items-center justify-between pt-2">
+              <span class="text-xs text-slate-500">Pronto para auditar a base de dados oficial da RFB.</span>
+              <div class="flex items-center gap-3">
+                <button id="btnCancelBatch" onclick="cancelarAuditoria()" class="hidden px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                  <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+                  <span>Interromper</span>
+                </button>
+                <button id="btnStartBatch" onclick="iniciarAuditoriaLote()" class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl shadow-md text-sm flex items-center gap-2 transition-all">
+                  <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                  <span>Iniciar Auditoria em Lote</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
           <!-- Barra de Progresso em Tempo Real -->
           <div id="progressSection" class="hidden mt-5 pt-5 border-t border-slate-100">
             <div class="flex justify-between text-xs font-semibold mb-1.5">
               <span id="progressStatus" class="text-blue-900">Consultando bases oficiais...</span>
-              <span id="progressPct" class="text-blue-700">0%</span>
+              <span id="progressPct" class="text-blue-700 font-bold">0%</span>
             </div>
             <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
               <div id="progressBar" class="bg-blue-600 h-full rounded-full transition-all duration-150" style="width: 0%"></div>
@@ -207,35 +239,67 @@
         <!-- Seção de Resultados (aparece após processamento) -->
         <div id="resultsSection" class="hidden space-y-6">
           
-          <!-- KPIs Executivos -->
-          <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <span class="text-xs text-slate-500 font-medium block">Total de Linhas</span>
-              <span id="kpiTotalLinhas" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
+          <!-- BANNER DE INCONSISTÊNCIAS / ERROS DE REDE -->
+          <div id="bannerInconsistencias" class="hidden p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-amber-100 rounded-xl text-amber-700 mt-0.5">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-amber-900 text-sm">
+                  Atenção: <span id="countInconsistencias" class="font-extrabold text-amber-800">0</span> notas tiveram instabilidade de rede ou limite de consultas
+                </h4>
+                <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                  As notas consultadas com sucesso estão 100% salvas. Você pode re-processar <b>apenas</b> os itens que falharam utilizando fontes alternativas de pesquisa em 1 clique!
+                </p>
+              </div>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <span class="text-xs text-slate-500 font-medium block">CNPJs Únicos</span>
-              <span id="kpiTotalUnicos" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button onclick="reauditarInconsistencias()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition-all">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span>Re-auditar Apenas Inconsistências</span>
+              </button>
+              <button onclick="exportarInconsistenciasExcel()" class="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold text-xs rounded-xl transition-all">
+                <i data-lucide="download" class="w-3.5 h-3.5 inline"></i>
+                <span>Lista de Inconsistências</span>
+              </button>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/30">
-              <span class="text-xs text-emerald-700 font-bold block">Optante Simples</span>
-              <span id="kpiTotalSimples" class="text-2xl font-bold text-emerald-800 mt-1 block">0</span>
-              <span id="kpiPercSimples" class="text-xs text-emerald-600 font-medium">0%</span>
+          </div>
+
+          <!-- KPIs Executivos com 7 Métricas Fiscais Precisas -->
+          <div class="grid grid-cols-2 md:grid-cols-7 gap-3">
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] text-slate-500 font-medium block">Total de Linhas</span>
+              <span id="kpiTotalLinhas" class="text-xl font-bold text-slate-800 mt-1 block">0</span>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm bg-amber-50/30">
-              <span class="text-xs text-amber-700 font-bold block">SIMEI (MEI)</span>
-              <span id="kpiTotalMei" class="text-2xl font-bold text-amber-800 mt-1 block">0</span>
-              <span id="kpiPercMei" class="text-xs text-amber-600 font-medium">0%</span>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] text-slate-500 font-medium block">CNPJs Únicos</span>
+              <span id="kpiTotalUnicos" class="text-xl font-bold text-slate-800 mt-1 block">0</span>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <span class="text-xs text-slate-600 font-bold block">Não Optantes</span>
-              <span id="kpiTotalNaoOptantes" class="text-2xl font-bold text-slate-800 mt-1 block">0</span>
-              <span id="kpiPercNaoOptantes" class="text-xs text-slate-500 font-medium">0%</span>
+            <div class="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/40">
+              <span class="text-[11px] text-emerald-700 font-bold block">Optante Simples</span>
+              <span id="kpiTotalSimples" class="text-xl font-bold text-emerald-800 mt-1 block">0</span>
+              <span id="kpiPercSimples" class="text-[10px] text-emerald-600 font-medium">0%</span>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm bg-red-50/30">
-              <span class="text-xs text-red-700 font-bold block">⚠️ Risco Baixada/Inapta</span>
-              <span id="kpiTotalIrregulares" class="text-2xl font-bold text-red-800 mt-1 block">0</span>
-              <span class="text-xs text-red-600 font-medium">Alerta Crítico</span>
+            <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm bg-amber-50/40">
+              <span class="text-[11px] text-amber-700 font-bold block">SIMEI (MEI)</span>
+              <span id="kpiTotalMei" class="text-xl font-bold text-amber-800 mt-1 block">0</span>
+              <span id="kpiPercMei" class="text-[10px] text-amber-600 font-medium">0%</span>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+              <span class="text-[11px] text-slate-600 font-bold block">Não Optantes</span>
+              <span id="kpiTotalNaoOptantes" class="text-xl font-bold text-slate-800 mt-1 block">0</span>
+              <span id="kpiPercNaoOptantes" class="text-[10px] text-slate-500 font-medium">0%</span>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-red-200 shadow-sm bg-red-50/40">
+              <span class="text-[11px] text-red-700 font-bold block">⚠️ Baixada/Inapta</span>
+              <span id="kpiTotalIrregulares" class="text-xl font-bold text-red-800 mt-1 block">0</span>
+              <span class="text-[10px] text-red-600 font-medium">Risco Fiscal</span>
+            </div>
+            <div id="cardKpiInconsistencias" class="bg-white p-3.5 rounded-xl border border-amber-300 shadow-sm bg-amber-50/30">
+              <span class="text-[11px] text-amber-800 font-bold block">⚠️ Inconsistências</span>
+              <span id="kpiTotalInconsistencias" class="text-xl font-bold text-amber-800 mt-1 block">0</span>
+              <span class="text-[10px] text-amber-600 font-medium">Pendentes</span>
             </div>
           </div>
 
@@ -247,9 +311,10 @@
                 <option value="TODOS">Todos os Registros</option>
                 <option value="SIMPLES NACIONAL">Apenas Simples Nacional</option>
                 <option value="SIMEI (MEI)">Apenas SIMEI (MEI)</option>
-                <option value="NÃO OPTANTE (REGIME GERAL)">Não Optantes (Lucro Presumido/Real)</option>
+                <option value="NÃO OPTANTE (REGIME GERAL)">Não Optantes Confirmados (Lucro Presumido/Real)</option>
                 <option value="EXCLUÍDO DO SIMPLES">Excluídos do Simples</option>
                 <option value="CRITICO">⚠️ Risco Cadastral (Baixadas/Inaptas)</option>
+                <option value="ERRO">⚠️ Apenas Inconsistências / Erros de Conexão</option>
               </select>
             </div>
 
@@ -480,13 +545,16 @@
     // --- REGRAS FISCAIS & PARECER DE AUDITORIA ---
     function gerarParecerFiscal(dados) {
       if (!dados || dados.sucesso === false) {
+        const isCnpjInvalido = dados && dados.erro && dados.erro.includes("Módulo 11");
         return {
-          enquadramento: "INVÁLIDO / NÃO ENCONTRADO",
+          enquadramento: isCnpjInvalido ? "CNPJ INVÁLIDO" : "INCONSISTÊNCIA / ERRO DE CONEXÃO",
           isOptante: false,
           isMei: false,
-          risco: "CRÍTICO",
-          badgeClass: "badge-critico",
-          parecer: dados ? dados.erro : "CNPJ matematicamente inválido ou não localizado."
+          isErro: !isCnpjInvalido,
+          isCnpjInvalido: isCnpjInvalido,
+          risco: isCnpjInvalido ? "CRÍTICO" : "MÉDIO",
+          badgeClass: isCnpjInvalido ? "badge-critico" : "badge-erro",
+          parecer: dados ? dados.erro : "Falha temporária de rede ou limite de consultas."
         };
       }
 
@@ -498,6 +566,7 @@
           enquadramento: "SIMEI (MEI)",
           isOptante: true,
           isMei: true,
+          isErro: false,
           risco: isIrregular ? "CRÍTICO" : "BAIXO",
           badgeClass: "badge-mei",
           parecer: `MICROEMPREENDEDOR INDIVIDUAL (SIMEI) desde ${formatarDataBR(dados.data_opcao_pelo_mei)}. Dispensa retenções na fonte de IRRF, CSLL, PIS e COFINS.` + (isIrregular ? ` ATENÇÃO: Situação cadastral ${sit}!` : "")
@@ -509,6 +578,7 @@
           enquadramento: "SIMPLES NACIONAL",
           isOptante: true,
           isMei: false,
+          isErro: false,
           risco: isIrregular ? "CRÍTICO" : "BAIXO",
           badgeClass: "badge-simples",
           parecer: `OPTANTE PELO SIMPLES NACIONAL desde ${formatarDataBR(dados.data_opcao_pelo_simples)}. Dispensa de retenção na fonte conforme art. 30 da Lei 10.833/2003 e IN RFB nº 1.234/2012.` + (isIrregular ? ` ALERTA: Situação cadastral ${sit}!` : "")
@@ -520,6 +590,7 @@
           enquadramento: "EXCLUÍDO DO SIMPLES",
           isOptante: false,
           isMei: false,
+          isErro: false,
           risco: isIrregular ? "CRÍTICO" : "MÉDIO",
           badgeClass: "badge-excluido",
           parecer: `EXCLUÍDO DO SIMPLES em ${formatarDataBR(dados.data_exclusao_do_simples)}. Regime Normal (Lucro Presumido/Real). Retenções obrigatórias para notas posteriores à exclusão.`
@@ -530,54 +601,141 @@
         enquadramento: "NÃO OPTANTE (REGIME GERAL)",
         isOptante: false,
         isMei: false,
+        isErro: false,
         risco: isIrregular ? "CRÍTICO" : "BAIXO",
         badgeClass: "badge-normal",
         parecer: `NÃO OPTANTE (Lucro Presumido ou Real). Sujeito à retenção regular na fonte de tributos federais.` + (isIrregular ? ` ALERTA GRAVE: Empresa com situação ${sit}!` : "")
       };
     }
 
-    // --- API CLIENT COM FALLBACK (BRASILAPI -> MINHA RECEITA) ---
-    async function consultarCNPJ(cnpjRaw) {
+    // --- CASCATA MULTI-APIS RESILIENTE (MINHA RECEITA + BRASILAPI + CNPJ.WS + RECEITAWS) ---
+    async function consultarCNPJ(cnpjRaw, options = {}) {
       const cnpj = limparCNPJ(cnpjRaw);
       if (!validarCNPJ(cnpj)) {
         return { sucesso: false, erro: "CNPJ matematicamente inválido (Módulo 11)" };
       }
 
-      // 1. Checa cache local do navegador
+      // 1. Checa cache local do navegador (apenas se for consulta bem-sucedida anterior)
       const cacheKey = `cnpj_${cnpj}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        try { return JSON.parse(cached); } catch (e) {}
+      if (!options.forcarReconsulta) {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (parsed.sucesso) return parsed;
+          } catch (e) {}
+        }
       }
 
       let data = null;
+      let ultimoErro = "";
 
-      // 2. Provedor Primário: BrasilAPI
+      // FONTE 1: Minha Receita (Base aberta oficial mais estável)
       try {
-        const resp1 = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-        if (resp1.ok) {
-          data = await resp1.json();
-          data.fonte = "BrasilAPI";
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 7000);
+        const resp = await fetch(`https://minhareceita.org/${cnpj}`, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (resp.ok) {
+          data = await resp.json();
+          data.fonte = "Minha Receita (RFB Oficial)";
+        } else if (resp.status === 429) {
+          await new Promise(r => setTimeout(r, 1200)); // Pausa de alívio se receber 429
         }
-      } catch (err) {}
+      } catch (err) {
+        ultimoErro = err.message;
+      }
 
-      // 3. Provedor Secundário: Minha Receita
+      // FONTE 2: BrasilAPI (com tratamento de 429)
       if (!data) {
         try {
-          const resp2 = await fetch(`https://minhareceita.org/${cnpj}`);
-          if (resp2.ok) {
-            data = await resp2.json();
-            data.fonte = "Minha Receita";
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 7000);
+          const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (resp.ok) {
+            data = await resp.json();
+            data.fonte = "BrasilAPI";
+          } else if (resp.status === 429) {
+            await new Promise(r => setTimeout(r, 1500)); // Pausa preventiva
+          }
+        } catch (err) {
+          ultimoErro = err.message;
+        }
+      }
+
+      // FONTE 3: CNPJ.ws (com suporte a token opcional ou endpoint público)
+      if (!data) {
+        try {
+          const token = document.getElementById('tokenApiKey')?.value?.trim();
+          const url = token ? `https://comercial.cnpj.ws/cnpj/${cnpj}?token=${token}` : `https://publica.cnpj.ws/cnpj/${cnpj}`;
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 7000);
+          const resp = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (resp.ok) {
+            const raw = await resp.json();
+            data = {
+              cnpj: cnpj,
+              razao_social: raw.razao_social,
+              nome_fantasia: raw.estabelecimento?.nome_fantasia || "",
+              descricao_situacao_cadastral: raw.estabelecimento?.situacao_cadastral || "ATIVA",
+              data_situacao_cadastral: raw.estabelecimento?.data_situacao_cadastral,
+              opcao_pelo_simples: raw.simples?.optante_simples === "Sim" || raw.simples?.optante_simples === true,
+              data_opcao_pelo_simples: raw.simples?.data_opcao_simples,
+              data_exclusao_do_simples: raw.simples?.data_exclusao_simples,
+              opcao_pelo_mei: raw.simples?.optante_mei === "Sim" || raw.simples?.optante_mei === true,
+              data_opcao_pelo_mei: raw.simples?.data_opcao_mei,
+              cnae_fiscal_descricao: raw.estabelecimento?.atividade_principal?.descricao || "",
+              uf: raw.estabelecimento?.estado?.sigla || "",
+              municipio: raw.estabelecimento?.cidade?.nome || "",
+              porte: raw.porte?.descricao || "",
+              fonte: token ? "CNPJ.ws (Chave Comercial)" : "CNPJ.ws (Pública)"
+            };
+          }
+        } catch (err) {}
+      }
+
+      // FONTE 4: ReceitaWS
+      if (!data) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 7000);
+          const resp = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj}`, { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (resp.ok) {
+            const raw = await resp.json();
+            if (raw.status !== "ERROR") {
+              data = {
+                cnpj: cnpj,
+                razao_social: raw.nome,
+                nome_fantasia: raw.fantasia,
+                descricao_situacao_cadastral: raw.situacao,
+                data_situacao_cadastral: raw.data_situacao,
+                opcao_pelo_simples: raw.simples?.optante === true,
+                data_opcao_pelo_simples: raw.simples?.data_opcao,
+                data_exclusao_do_simples: raw.simples?.data_exclusao,
+                opcao_pelo_mei: raw.simei?.optante === true,
+                data_opcao_pelo_mei: raw.simei?.data_opcao,
+                cnae_fiscal_descricao: raw.atividade_principal?.[0]?.text || "",
+                uf: raw.uf,
+                municipio: raw.municipio,
+                porte: raw.porte,
+                fonte: "ReceitaWS"
+              };
+            }
           }
         } catch (err) {}
       }
 
       if (!data) {
-        return { sucesso: false, erro: "Instabilidade nas APIs da Receita Federal. Tente novamente." };
+        return { 
+          sucesso: false, 
+          erro: "Instabilidade nas APIs da Receita Federal por limite de taxa. Clique em 'Re-auditar Inconsistências'." 
+        };
       }
 
       data.sucesso = true;
-      // Salva no cache do navegador
       try {
         localStorage.setItem(cacheKey, JSON.stringify(data));
         salvarNoHistoricoGlobal(cnpj, data);
@@ -600,10 +758,11 @@
       localStorage.setItem('audit_historico_cnpjs', JSON.stringify(historico));
     }
 
-    // --- UPLOAD E DETECÇÃO INTELIGENTE DE PLANILHAS ---
+    // --- CONTROLE DE EXECUÇÃO EM LOTE ---
     let planilhaBruta = [];
     let nomeArquivoCarregado = "";
     let resultadosAuditados = [];
+    let cancelamentoSolicitado = false;
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -677,25 +836,45 @@
       document.getElementById('fileStatsBadge').innerText = `${planilhaBruta.length.toLocaleString('pt-BR')} linhas carregadas (${nomeArquivoCarregado})`;
       document.getElementById('columnSelectorSection').classList.remove('hidden');
       document.getElementById('resultsSection').classList.add('hidden');
+      lucide.createIcons();
     }
 
-    // --- EXECUÇÃO EM LOTE ---
+    function cancelarAuditoria() {
+      cancelamentoSolicitado = true;
+      document.getElementById('progressStatus').innerText = "Interrompendo auditoria com segurança...";
+    }
+
+    // --- EXECUÇÃO EM LOTE PRINCIPAL ---
     async function iniciarAuditoriaLote() {
+      cancelamentoSolicitado = false;
       const colCnpj = document.getElementById('cnpjColumnSelect').value;
       const progressSection = document.getElementById('progressSection');
       const progressBar = document.getElementById('progressBar');
       const progressStatus = document.getElementById('progressStatus');
       const progressPct = document.getElementById('progressPct');
+      const btnCancel = document.getElementById('btnCancelBatch');
+      const btnStart = document.getElementById('btnStartBatch');
+      const modoVelocidade = document.getElementById('modoVelocidadeSelect').value;
 
       progressSection.classList.remove('hidden');
+      btnCancel.classList.remove('hidden');
+      btnStart.disabled = true;
+      btnStart.classList.add('opacity-50');
       document.getElementById('resultsSection').classList.add('hidden');
 
-      // Desduplica CNPJs únicos para poupar rede
+      // Define delay conforme o modo
+      let delayMs = 280; // Padrão seguro para grandes lotes
+      if (modoVelocidade === "RAPIDO") delayMs = 120;
+      if (modoVelocidade === "TURBO") delayMs = 50;
+
+      // Desduplica CNPJs únicos
       const mapaCNPJs = {};
       const cnpjsUnicos = Array.from(new Set(planilhaBruta.map(r => limparCNPJ(r[colCnpj])).filter(Boolean)));
       const totalUnicos = cnpjsUnicos.length;
 
       for (let i = 0; i < totalUnicos; i++) {
+        if (cancelamentoSolicitado) break;
+
         const cnpj = cnpjsUnicos[i];
         progressStatus.innerText = `Consultando CNPJ (${i+1}/${totalUnicos}): ${formatarCNPJ(cnpj)}...`;
         const pct = Math.round(((i + 1) / totalUnicos) * 100);
@@ -706,16 +885,16 @@
         const parecer = gerarParecerFiscal(dados);
         mapaCNPJs[cnpj] = { dados, parecer };
 
-        // Pequena pausa para requisições externas não cacheadas
-        if (!dados.fonte || dados.fonte !== "Cache Local") {
-          await new Promise(r => setTimeout(r, 60));
+        // Delay de proteção contra bloqueio
+        if (!dados.fonte || !dados.fonte.includes("Cache")) {
+          await new Promise(r => setTimeout(r, delayMs));
         }
       }
 
-      // Mapeia de volta para todas as linhas originais
+      // Mapeia para a base completa
       resultadosAuditados = planilhaBruta.map(row => {
         const c = limparCNPJ(row[colCnpj]);
-        const res = mapaCNPJs[c] || { dados: { sucesso: false, erro: "CNPJ Ausente" }, parecer: gerarParecerFiscal(null) };
+        const res = mapaCNPJs[c] || { dados: { sucesso: false, erro: "CNPJ Ausente ou Não Processado" }, parecer: gerarParecerFiscal(null) };
         return {
           ...row,
           _cnpj: c,
@@ -724,8 +903,9 @@
           _enquadramento: res.parecer.enquadramento,
           _isOptante: res.parecer.isOptante,
           _isMei: res.parecer.isMei,
+          _isErro: res.parecer.isErro,
           _dataOpcao: formatarDataBR(res.dados.data_opcao_pelo_simples),
-          _situacao: res.dados.descricao_situacao_cadastral || res.dados.situacao_cadastral || "INVÁLIDO",
+          _situacao: res.dados.descricao_situacao_cadastral || res.dados.situacao_cadastral || (res.parecer.isErro ? "INSTABILIDADE" : "INVÁLIDO"),
           _risco: res.parecer.risco,
           _badgeClass: res.parecer.badgeClass,
           _parecer: res.parecer.parecer
@@ -733,18 +913,99 @@
       });
 
       progressSection.classList.add('hidden');
+      btnCancel.classList.add('hidden');
+      btnStart.disabled = false;
+      btnStart.classList.remove('opacity-50');
+
       exibirResultados(resultadosAuditados, cnpjsUnicos.length);
     }
 
+    // --- RE-AUDITORIA EXCLUSIVA DE INCONSISTÊNCIAS / ERROS ---
+    async function reauditarInconsistencias() {
+      if (!resultadosAuditados.length) return;
+
+      // 1. Identifica apenas os CNPJs com inconsistência
+      const cnpjsComErro = Array.from(new Set(
+        resultadosAuditados
+          .filter(d => d._isErro || d._enquadramento === "INCONSISTÊNCIA / ERRO DE CONEXÃO" || d._situacao === "INSTABILIDADE")
+          .map(d => d._cnpj)
+          .filter(Boolean)
+      ));
+
+      if (!cnpjsComErro.length) {
+        alert("Nenhuma inconsistência pendente para re-auditar!");
+        return;
+      }
+
+      const progressSection = document.getElementById('progressSection');
+      const progressBar = document.getElementById('progressBar');
+      const progressStatus = document.getElementById('progressStatus');
+      const progressPct = document.getElementById('progressPct');
+
+      progressSection.classList.remove('hidden');
+      const totalErros = cnpjsComErro.length;
+
+      let recuperados = 0;
+      const mapaRecuperados = {};
+
+      for (let i = 0; i < totalErros; i++) {
+        const cnpj = cnpjsComErro[i];
+        progressStatus.innerText = `Re-consultando inconsistência (${i+1}/${totalErros}): ${formatarCNPJ(cnpj)} em fontes alternativas...`;
+        const pct = Math.round(((i + 1) / totalErros) * 100);
+        progressBar.style.width = `${pct}%`;
+        progressPct.innerText = `${pct}%`;
+
+        // Força reconsulta ignorando cache de erro anterior com delay seguro de 350ms
+        const dados = await consultarCNPJ(cnpj, { forcarReconsulta: true });
+        const parecer = gerarParecerFiscal(dados);
+
+        if (dados.sucesso) {
+          recuperados++;
+          mapaRecuperados[cnpj] = { dados, parecer };
+        }
+
+        await new Promise(r => setTimeout(r, 320));
+      }
+
+      // 2. Atualiza os dados na tabela e no resultado
+      resultadosAuditados = resultadosAuditados.map(row => {
+        if (mapaRecuperados[row._cnpj]) {
+          const res = mapaRecuperados[row._cnpj];
+          return {
+            ...row,
+            _razaoSocial: res.dados.razao_social || "",
+            _enquadramento: res.parecer.enquadramento,
+            _isOptante: res.parecer.isOptante,
+            _isMei: res.parecer.isMei,
+            _isErro: false,
+            _dataOpcao: formatarDataBR(res.dados.data_opcao_pelo_simples),
+            _situacao: res.dados.descricao_situacao_cadastral || res.dados.situacao_cadastral || "ATIVA",
+            _risco: res.parecer.risco,
+            _badgeClass: res.parecer.badgeClass,
+            _parecer: res.parecer.parecer
+          };
+        }
+        return row;
+      });
+
+      progressSection.classList.add('hidden');
+      alert(`Re-auditoria concluída! ${recuperados} de ${totalErros} inconsistências foram recuperadas e atualizadas com sucesso.`);
+      
+      const unicosTotal = Array.from(new Set(resultadosAuditados.map(r => r._cnpj).filter(Boolean))).length;
+      exibirResultados(resultadosAuditados, unicosTotal);
+    }
+
+    // --- ATUALIZAÇÃO DOS KPIS E TABELA COM CÁLCULO SEPARADO ---
     function exibirResultados(dados, totalUnicos) {
       document.getElementById('resultsSection').classList.remove('hidden');
 
-      // KPIs
       const totalLinhas = dados.length;
+      const totalErros = dados.filter(d => d._isErro).length;
       const totalSimples = dados.filter(d => d._isOptante && !d._isMei).length;
       const totalMei = dados.filter(d => d._isMei).length;
-      const totalNaoOpt = dados.filter(d => !d._isOptante).length;
-      const totalIrreg = dados.filter(d => ["BAIXADA", "INAPTA", "SUSPENSA", "NULA"].includes(d._situacao)).length;
+      // NÃO OPTANTES são estritamente os confirmados como Não Optantes (excluindo erros)
+      const totalNaoOpt = dados.filter(d => !d._isOptante && !d._isErro && !d._isCnpjInvalido).length;
+      const totalIrreg = dados.filter(d => !d._isErro && ["BAIXADA", "INAPTA", "SUSPENSA", "NULA"].includes(d._situacao)).length;
 
       document.getElementById('kpiTotalLinhas').innerText = totalLinhas.toLocaleString('pt-BR');
       document.getElementById('kpiTotalUnicos').innerText = totalUnicos.toLocaleString('pt-BR');
@@ -753,10 +1014,21 @@
       document.getElementById('kpiTotalMei').innerText = totalMei.toLocaleString('pt-BR');
       document.getElementById('kpiPercMei').innerText = `${((totalMei/totalLinhas)*100).toFixed(1)}% do total`;
       document.getElementById('kpiTotalNaoOptantes').innerText = totalNaoOpt.toLocaleString('pt-BR');
-      document.getElementById('kpiPercNaoOptantes').innerText = `${((totalNaoOpt/totalLinhas)*100).toFixed(1)}% do total`;
+      document.getElementById('kpiPercNaoOptantes').innerText = `${((totalNaoOpt/totalLinhas)*100).toFixed(1)}% confirmados`;
       document.getElementById('kpiTotalIrregulares').innerText = totalIrreg.toLocaleString('pt-BR');
+      document.getElementById('kpiTotalInconsistencias').innerText = totalErros.toLocaleString('pt-BR');
+
+      // Banner de Inconsistências
+      const banner = document.getElementById('bannerInconsistencias');
+      if (totalErros > 0) {
+        banner.classList.remove('hidden');
+        document.getElementById('countInconsistencias').innerText = totalErros.toLocaleString('pt-BR');
+      } else {
+        banner.classList.add('hidden');
+      }
 
       aplicarFiltrosTabela();
+      lucide.createIcons();
     }
 
     function aplicarFiltrosTabela() {
@@ -767,6 +1039,8 @@
       let filtrados = resultadosAuditados;
       if (filtro === "CRITICO") {
         filtrados = filtrados.filter(d => d._risco === "CRÍTICO" || ["BAIXADA", "INAPTA"].includes(d._situacao));
+      } else if (filtro === "ERRO") {
+        filtrados = filtrados.filter(d => d._isErro || d._enquadramento.includes("INCONSISTÊNCIA"));
       } else if (filtro !== "TODOS") {
         filtrados = filtrados.filter(d => d._enquadramento === filtro);
       }
@@ -831,6 +1105,7 @@
       XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo CNPJs");
 
       // 3. Aba Sumário Executivo
+      const totalErros = resultadosAuditados.filter(d => d._isErro).length;
       const wsSumario = XLSX.utils.aoa_to_sheet([
         ["PARECER EXECUTIVO DE AUDITORIA FISCAL - HILÉIA ALIMENTOS"],
         ["Gerado em:", new Date().toLocaleString('pt-BR')],
@@ -840,12 +1115,22 @@
         ["Total de CNPJs Únicos", Object.keys(mapaResumo).length],
         ["Optantes pelo Simples Nacional", resultadosAuditados.filter(d => d._isOptante && !d._isMei).length],
         ["SIMEI (Microempreendedores)", resultadosAuditados.filter(d => d._isMei).length],
-        ["Não Optantes (Regime Normal)", resultadosAuditados.filter(d => !d._isOptante).length],
-        ["Empresas Baixadas / Inaptas", resultadosAuditados.filter(d => ["BAIXADA", "INAPTA"].includes(d._situacao)).length]
+        ["Não Optantes Confirmados", resultadosAuditados.filter(d => !d._isOptante && !d._isErro && !d._isCnpjInvalido).length],
+        ["Empresas Baixadas / Inaptas", resultadosAuditados.filter(d => ["BAIXADA", "INAPTA"].includes(d._situacao)).length],
+        ["Inconsistências Pendentes", totalErros]
       ]);
       XLSX.utils.book_append_sheet(wb, wsSumario, "Sumário Executivo");
 
       XLSX.writeFile(wb, `Auditoria_Simples_${nomeArquivoCarregado.replace(/\.[^/.]+$/, "")}.xlsx`);
+    }
+
+    function exportarInconsistenciasExcel() {
+      const erros = resultadosAuditados.filter(d => d._isErro || d._enquadramento.includes("INCONSISTÊNCIA"));
+      if (!erros.length) return alert("Nenhuma inconsistência encontrada!");
+      const ws = XLSX.utils.json_to_sheet(erros);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inconsistências");
+      XLSX.writeFile(wb, `Inconsistencias_${nomeArquivoCarregado.replace(/\.[^/.]+$/, "")}.xlsx`);
     }
 
     function exportarCSV() {
