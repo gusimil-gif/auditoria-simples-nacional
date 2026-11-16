@@ -200,12 +200,11 @@ def criar_manual_pdf(caminho_saida: str):
     ))
 
     dados_acesso = [
-        [Paragraph("<b>Link Online Ativo:</b>", style_body), Paragraph("https://33e3e0a40fb261f3-179-98-75-109.serveousercontent.com", style_body)],
-        [Paragraph("<b>Deploy Permanente 24/7 (Streamlit Cloud):</b>", style_body), Paragraph("https://github.com/gusimil-gif/auditoria-simples-nacional", style_body)],
-        [Paragraph("<b>Endereço na Rede Local (Wi-Fi):</b>", style_body), Paragraph("http://192.168.15.132:8501", style_body)],
-        [Paragraph("<b>Usuário Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>admin</b></font>", style_body)],
-        [Paragraph("<b>Senha Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>Auditoria@2026</b></font>", style_body)],
-        [Paragraph("<b>Usuários Adicionais:</b>", style_body), Paragraph("<b>auditoria</b> (Senha: Hileia@2026) | <b>gustavo</b> (Senha: Auditoria@2026)", style_body)]
+        [Paragraph("<b>Link Online Oficial (Netlify):</b>", style_body), Paragraph("https://auditoria-simples-hileia.netlify.app", style_body)],
+        [Paragraph("<b>Repositório Oficial no GitHub:</b>", style_body), Paragraph("https://github.com/gusimil-gif/auditoria-simples-nacional", style_body)],
+        [Paragraph("<b>Usuário Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>gustavo</b></font> (ou admin)", style_body)],
+        [Paragraph("<b>Senha Master:</b>", style_body), Paragraph("<font color='#1E3A8A'><b>123mudar</b></font>", style_body)],
+        [Paragraph("<b>Usuários Adicionais:</b>", style_body), Paragraph("<b>admin</b> (Senha: 123mudar) | <b>auditoria</b> (Senha: Hileia@2026)", style_body)]
     ]
     t_acesso = Table(dados_acesso, colWidths=[160, 360])
     t_acesso.setStyle(TableStyle([

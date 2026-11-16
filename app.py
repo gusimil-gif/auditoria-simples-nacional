@@ -56,7 +56,7 @@ if not st.session_state.authenticated:
         with st.form("form_login"):
             st.subheader("🔐 Acesso Restrito")
             st.caption("Insira suas credenciais master para acessar o sistema de auditoria.")
-            user_input = st.text_input("Usuário Master", placeholder="Ex: admin", value="admin")
+            user_input = st.text_input("Usuário Master", placeholder="Ex: gustavo", value="gustavo")
             pass_input = st.text_input("Senha Master", type="password", placeholder="Digite sua senha")
             btn_entrar = st.form_submit_button("🚀 Entrar no Sistema", type="primary", use_container_width=True)
 
