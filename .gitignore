@@ -7,3 +7,4 @@ data/cnpj_cache.db
 tests/test_cache.db
 .pytest_cache/
 cloudflared
+.netlify/
